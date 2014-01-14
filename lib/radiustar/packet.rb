@@ -192,14 +192,16 @@ module Radiustar
     end
 
     def xor_str(str1, str2)
-      i = 0
-      newstr = ""
-      str1.each_byte do |c1|
-        c2 = str2.bytes.to_a[i]
-        newstr = newstr << (c1 ^ c2)
-        i = i+1
+      bstr1 = RUBY_VERSION == '1.8.7' ? str1.bytes.to_a : str1.bytes
+      bstr2 = RUBY_VERSION == '1.8.7' ? str2.bytes.to_a : str2.bytes
+
+      bstr = bstr1.dup
+    
+      0.upto(bstr2.count-1) do |index|
+        bstr.insert(index * 2 + 1, bstr2[index])
       end
-      newstr
+
+      bstr.each_slice(2).map { |b1,b2| b1 ^ b2 }.pack('c*')
     end
 
     def encode(value, secret)
