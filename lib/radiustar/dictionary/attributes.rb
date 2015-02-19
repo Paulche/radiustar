@@ -1,5 +1,7 @@
 module Radiustar
 
+  
+
   class AttributesCollection < Array
 
     attr_accessor :vendor
@@ -12,11 +14,11 @@ module Radiustar
 
     def add(name, id, type)
       if vendor?
-        @collection[name] ||= Attribute.new(name, id.to_i, type, @vendor)
+        @collection[name] ||= Attribute.new(name, id, type, @vendor)
       else
-        @collection[name] ||= Attribute.new(name, id.to_i, type)
+        @collection[name] ||= Attribute.new(name, id, type)
       end
-      @revcollection[id.to_i] ||= @collection[name]
+      @revcollection[convert_to_int(id)] ||= @collection[name]
       self << @collection[name]
     end
 
@@ -32,6 +34,17 @@ module Radiustar
       !!@vendor
     end
 
+    def convert_to_int(obj)
+      if obj.kind_of?(String)
+        if obj.start_with?('0x')
+          obj.to_i(16)
+        else
+          obj.to_i
+        end
+      else
+        obj
+      end
+    end
   end
 
   class Attribute
@@ -43,13 +56,13 @@ module Radiustar
     def initialize(name, id, type, vendor=nil)
       @values = ValuesCollection.new
       @name = name
-      @id = id.to_i
+      @id = convert_to_int(id)
       @type = type
       @vendor = vendor if vendor
     end
 
     def add_value(name, id)
-      @values.add(name, id.to_i)
+      @values.add(name, convert_to_int(id))
     end
 
     def find_values_by_name(name)
@@ -57,7 +70,7 @@ module Radiustar
     end
 
     def find_values_by_id(id)
-      @values.find_by_id(id.to_i)
+      @values.find_by_id(convert_to_int(id))
     end
 
     def has_values?
@@ -72,6 +85,17 @@ module Radiustar
       !!@vendor
     end
 
+    private 
+    def convert_to_int(obj)
+      if obj.kind_of?(String)
+        if obj.start_with?('0x')
+          obj.to_i(16)
+        else
+          obj.to_i
+        end
+      else
+        obj
+      end
+    end
   end
-
 end
